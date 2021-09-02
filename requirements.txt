@@ -1,4 +1,4 @@
-# pip install -r requirements.txt
+# pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
 
 # base ----------------------------------------
 matplotlib>=3.2.2
@@ -33,3 +33,6 @@ thop  # FLOPs computation
 
 # above from yolov5
 pywin32
+
+torch==1.9.0+cu111
+torchvision==0.10.0+cu111

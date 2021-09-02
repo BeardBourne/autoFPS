@@ -1,6 +1,7 @@
 conda create --name autoFPS python=3.9.5
 conda activate autoFPS
 cd C:\dev\autoFPS
+nvidia-smi
 
 
 
