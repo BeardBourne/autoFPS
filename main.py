@@ -43,30 +43,65 @@ with torch.no_grad():
         pred = model(img, augment=True)[0]
         pred = non_max_suppression(pred)
 
+
         
         # Process detections
         for i, det in enumerate(pred):  # detections per image
 
-            s = ''
-            s += '%gx%g ' % img.shape[2:]  # print string
+            # s = ''
+            # s += '%gx%g ' % img.shape[2:]  # print string
             if len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
 
                 # Print results
-                for c in det[:, -1].unique():
-                    n = (det[:, -1] == c).sum()  # detections per class
-                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                # for c in det[:, -1].unique():
+                #     n = (det[:, -1] == c).sum()  # detections per class
+                #     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+
+
+                # cpu_det = det.to('cpu').detach().numpy().copy()
+                # max_index = np.argmax(cpu_det[:,-2], 0)
+                # print(max_index)
+                # max_index = max_index[0]
+                # print(max_index)
+                # print(cpu_det[:,-2])
 
                 # Write results
+                head_center = None
+                upper_body_center = None
+
                 for *xyxy, conf, cls in reversed(det):
                     label = f'{names[int(cls)]} {conf:.2f}'
-                    plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=8)
+                    plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                    c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3]))
+                    if 'head' in label:
+                        if float(conf) > 0.5:
+                            head_center = (int((c1[0]+ c2[0])/2),int((c1[1]+ c2[1])/2))
+                    else:
+                        if float(conf) > 0.5:
+                            upper_body_center = (int((c1[0]+ c2[0])/2),int((c1[1]*3+ c2[1])/4))
+
+                
+                # reversed so the last xyxy has the most high score.
+                if head_center:
+                    im0 = cv2.circle(im0, head_center, radius=8, color=(255, 0, 0), thickness=-1)
+                elif upper_body_center:
+                    im0 = cv2.circle(im0, upper_body_center, radius=8, color=(255, 255, 255), thickness=-1)
+
+
+
 
         im0 = cv2.cvtColor(im0, cv2.COLOR_BGR2RGB)
         im0 = cv2.resize(im0, (windowsz, windowsz))
 
-        screen[int((screensz-windowsz)/2):int((screensz+windowsz)/2), int((screensz-windowsz)/2):int((screensz+windowsz)/2)] = im0
+        lt = int((screensz-windowsz)/2)
+        rb = int((screensz+windowsz)/2)
+
+        screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+        screen[lt:rb, lt:rb] = im0
+
+        cv2.rectangle(screen, (lt, lt), (rb, rb), [200, 200, 200], 5, cv2.LINE_AA)
 
         cv2.imshow('result', screen)
         cv2.waitKey(10)
