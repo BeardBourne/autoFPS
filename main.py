@@ -17,6 +17,8 @@ with torch.no_grad():
     model = attempt_load(weights, map_location=device)  # load FP32 model
     stride = int(model.stride.max())  # model stride
     imgsz = 640
+    windowsz=320
+    screensz=640
     model.half()
     names = model.module.names if hasattr(model, 'module') else model.names
     colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
@@ -24,10 +26,10 @@ with torch.no_grad():
     model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
 
 
-    for i in range(100):
-        screen = grab_screen(region=(0, 0, 1920, 1080))
-        screen = cv2.resize(screen, (imgsz, imgsz))
-        im0 = screen
+    for i in range(4000):
+        screen = grab_screen(region=(int((1920-screensz)/2), int((1080-screensz)/2), int((1920+screensz)/2), int((1080+screensz)/2)))
+        window = grab_screen(region=(int((1920-windowsz)/2), int((1080-windowsz)/2), int((1920+windowsz)/2), int((1080+windowsz)/2)))
+        im0 = cv2.resize(window, (imgsz, imgsz))
         img = letterbox(im0, imgsz, stride=stride)[0]
         img = img[:, :, ::-1].transpose(2, 0, 1)
 
@@ -58,26 +60,14 @@ with torch.no_grad():
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
-
                     label = f'{names[int(cls)]} {conf:.2f}'
+                    plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=8)
 
-                    if 'head' in label:
-                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
-
-            # Stream results
         im0 = cv2.cvtColor(im0, cv2.COLOR_BGR2RGB)
-        cv2.imshow('result', im0)
+        im0 = cv2.resize(im0, (windowsz, windowsz))
 
+        screen[int((screensz-windowsz)/2):int((screensz+windowsz)/2), int((screensz-windowsz)/2):int((screensz+windowsz)/2)] = im0
 
-
-
-
-
-
-
-
-
-
-        # cv2.imshow('cv2screen', screen)
+        cv2.imshow('result', screen)
         cv2.waitKey(10)
 cv2.destroyAllWindows()
