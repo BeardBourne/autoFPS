@@ -11,13 +11,13 @@ import cv2
 from numpy import random
 import win32api
 import win32con
-from operator import add, sub
+from operator import add
 
 import keys as k
 keys = k.Keys()
 
-# from pymouse import PyMouse
 import pyautogui
+import pydirectinput
 
 from datetime import datetime
 
@@ -93,12 +93,12 @@ with torch.no_grad():
                     target_center = None
 
                     for *xyxy, conf, cls in reversed(det):
-                        if float(conf) > 0.5:
+                        if float(conf) > 0.6:
                             label = f'{names[int(cls)]} {conf:.2f}'
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
                             c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3]))
                             if 'head' in label:
-                                if float(conf) > 0.7:
+                                if float(conf) > 0.8:
                                     head_center = [int((c1[0]+ c2[0])/2),int((c1[1]+ c2[1])/2)]
                             else:
                                 upper_body_center = [int((c1[0]+ c2[0])/2),int((c1[1]*3+ c2[1])/4)]
@@ -115,19 +115,11 @@ with torch.no_grad():
                         upper_body_center = None
                     if target_center:
 
+                        target_center =list(map(add, [window_region[0], window_region[1]], target_center))
 
+                        pydirectinput.moveTo(target_center[0], int(target_center[1]), relative=True)
+                        # pydirectinput.click()
 
-                        # target_center =list(map(add, [window_region[0], window_region[1]], target_center))
-                        # delt_to_center = list(map(sub, target_center, center))
-                        # print(delt_to_center)
-                        # keys.directMouse(delt_to_center[0], delt_to_center[1])
-                        # pyautogui.moveRel(delt_to_center[0], delt_to_center[1])
-                        
-
-
-                        win32api.SetCursorPos(list(map(add, [window_region[0], window_region[1]], target_center)))
-                        # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
-                        # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
                         target_center = None
             # print('SetCursorPos')
             # print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3])
