@@ -118,7 +118,10 @@ with torch.no_grad():
                         target_center =list(map(add, [window_region[0], window_region[1]], target_center))
 
                         pydirectinput.moveTo(target_center[0], int(target_center[1]), relative=True)
-                        # pydirectinput.click()
+                        
+                        pydirectinput.click()
+                        pydirectinput.click()
+                        pydirectinput.click()
 
                         target_center = None
             # print('SetCursorPos')
@@ -127,17 +130,19 @@ with torch.no_grad():
 
 
 
-            im0 = cv2.cvtColor(im0, cv2.COLOR_BGR2RGB)
-            im0 = cv2.resize(im0, (windowsz, windowsz))
+            # im0 = cv2.cvtColor(im0, cv2.COLOR_BGR2RGB)
+            # im0 = cv2.resize(im0, (windowsz, windowsz))
 
-            lt = int((screensz-windowsz)/2)
-            rb = int((screensz+windowsz)/2)
+            # lt = int((screensz-windowsz)/2)
+            # rb = int((screensz+windowsz)/2)
 
-            screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
-            screen[lt:rb, lt:rb] = im0
+            # screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+            # screen[lt:rb, lt:rb] = im0
 
-            cv2.rectangle(screen, (lt, lt), (rb, rb), [200, 200, 200], 5, cv2.LINE_AA)
-            cv2.imshow('result', screen)
+            # cv2.rectangle(screen, (lt, lt), (rb, rb), [200, 200, 200], 5, cv2.LINE_AA)
+            # cv2.imshow('result', screen)
+
+
             cv2.waitKey(1)
 
 
